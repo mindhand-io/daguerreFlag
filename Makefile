@@ -3,35 +3,26 @@
 # allow user to override go executable by running as GOEXE=xxx make ... on unix-like systems
 GOEXE ?= go
 
-.PHONY: all clean check-required-toolset dep-install dep-update help build test lint
+.PHONY: all clean check-required-toolset help build test lint
 .DEFAULT_GOAL := help
 
-all: dep-install lint
+all: lint clean build build-linux
 
-
-lint: ## run code lint
-	@gometalinter.v1 --config .linter.conf --vendor ./...
+lint: check-required-toolset ## run code lint
+	golangci-lint run
 
 check-required-toolset:
-	@command -v dep > /dev/null || (echo "Install golang/dep..." && go get -u github.com/golang/dep/cmd/dep)
-	@command -v gometalinter.v2 > /dev/null || (echo "Install gometalinter..." && go get -u gopkg.in/alecthomas/gometalinter.v2 && gometalinter.v2 --install)
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 
+build: ## build darwin(osx)
+	go build -o ./build/daguerreFlag.darwin
 
-dep-install: check-required-toolset ## install go dependencies
-	dep ensure
+build-linux: ## build linux
+	GOOS=linux GOARCH=amd64 go build -o ./build/daguerreFlag.amd64
 
-dep-update: ## update go dependencies
-	dep ensure -update
-
-build: # build darwin(osx)
-	rm -f ./build/daguerreFlag.darwin && go build -o ./build/daguerreFlag.darwin
-
-build-linux: # build linux
-    rm -f ./build/daguerreFlag.amd64 && GOOS=linux GOARCH=amd64 go build -o ./build/daguerreFlag.amd64
-
-clean:
+clean: ## clean up build artifacts
 	rm -f ./build/daguerreFlag*
 
 help: ## help
-	@echo "HathCoin Makefile Tasks list:"
+	@echo "daguerreFlag Makefile Tasks list:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
