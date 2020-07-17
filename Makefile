@@ -15,10 +15,10 @@ check-required-toolset:
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 
 build: ## build darwin(osx)
-	go build -o ./build/daguerreFlag.darwin
+	go build -tags 'osusergo netgo' -o ./build/daguerreFlag.darwin
 
 build-linux: ## build linux
-	GOOS=linux GOARCH=amd64 go build -o ./build/daguerreFlag.amd64
+	GOOS=linux GOARCH=amd64 go build -tags 'osusergo netgo' -o ./build/daguerreFlag.amd64
 
 clean: ## clean up build artifacts
 	rm -f ./build/daguerreFlag*
